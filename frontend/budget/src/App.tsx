@@ -11,6 +11,8 @@ const fetchTransactions = async () => {
   return transactionsResponse.json()
 }
 
+
+
 function App() {
   const { data, isLoading } = useQuery({queryKey: ['transactions'], queryFn: fetchTransactions})
   if (isLoading) {
@@ -18,7 +20,7 @@ function App() {
   }
   return (
     <>
-      <h1>Budget v1.0</h1>
+      <h1>Budget app</h1>
       <div className="card">
         
         <Transactions transactions={data}>

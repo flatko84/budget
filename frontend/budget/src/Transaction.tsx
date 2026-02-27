@@ -1,12 +1,19 @@
 import { useState } from 'react'
-function Transaction({transaction}) {
+function Transaction({transaction, deleteTransaction}) {
 
     const transactionColor = transaction.amount < 0 ? 'red' : 'green'
+    const amount = (amount) => {
+      if (amount < 0) {
+        amount = amount*-1
+      }
+      return amount
+    }
+
   return (
     <>
-      <div className={"card " + transactionColor}>
-        {transaction.name} - €{transaction.amount}
-      </div>
+      <tr><td className={transactionColor}>
+        {transaction.name}: €{amount(transaction.amount)}</td><td><button data-id={transaction.id} onClick={(e) => {e.preventDefault; deleteTransaction(e.target.dataset.id)}}>Delete</button></td>
+      </tr>
       
     </>
   )
