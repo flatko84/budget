@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import Transaction from './Transaction'
 import CreateTransaction from './CreateTransaction'
-import { useQuery, useMutation } from '@tanstack/react-query'
-function Transactions({transactions}) {
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+function Transactions() {
+  const queryClient = useQueryClient();
 
 const fetchCategories = async () => {
   const categoriesResponse = await fetch('http://localhost:8000/categories')
@@ -12,6 +13,14 @@ const fetchCategories = async () => {
   return categoriesResponse.json()
 }
 
+const fetchTransactions = async () => {
+  const transactionsResponse = await fetch('http://localhost:8000/transactions')
+  if (!transactionsResponse.ok) {
+    throw new Error("Error getting transactions.")
+  }
+  return transactionsResponse.json()
+}
+
 const processDeleteTransaction = async (transactionId) => {
   const response = await fetch(`http://localhost:8000/transaction/${transactionId}`,{
     method: "DELETE"
@@ -19,21 +28,30 @@ const processDeleteTransaction = async (transactionId) => {
   return response.json()
 }
 
-const {mutate} = useMutation({mutationFn: processDeleteTransaction})
+const transactionMutation = useMutation({mutationFn: processDeleteTransaction, 
+onSuccess: () => {
+      queryClient.invalidateQueries(["transactions"]);
+    },
+})
 
 const handleDeleteTransaction = (e) => {
-  mutate(e)
+  transactionMutation.mutate(e)
+}
+
+const createTransactionCallback = () => {
+  queryClient.invalidateQueries(["transactions"]);
 }
 
 
-  const { data, isLoading } = useQuery({queryKey: ['categories'], queryFn: fetchCategories})
+  const categories = useQuery({queryKey: ['categories'], queryFn: fetchCategories})
+  const transactions = useQuery({queryKey: ['transactions'], queryFn: fetchTransactions})
   return (
     <>
     <h2>Create transaction</h2>
-    <CreateTransaction categories={data}></CreateTransaction>
+    <CreateTransaction categories={categories.data} createTransactionCallback={createTransactionCallback}></CreateTransaction>
       <h2>Transactions list</h2>
       <table><tbody>
-      {transactions?.map(transaction => {
+      {transactions?.data?.map(transaction => {
         return <Transaction key={transaction.id} transaction={transaction} deleteTransaction={handleDeleteTransaction}></Transaction>
       })}
       </tbody>

@@ -1,8 +1,8 @@
 from fastapi import FastAPI, Depends, HTTPException, Response
 from fastapi.responses import HTMLResponse
 import uvicorn
-from sqlalchemy import create_engine, Column, Integer, String, Numeric, ForeignKey
-from sqlalchemy.orm import sessionmaker, Session, DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy import create_engine, Column, Integer, String, Numeric, ForeignKey, select
+from sqlalchemy.orm import sessionmaker, Session, DeclarativeBase, Mapped, mapped_column, relationship, selectinload, joinedload
 from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
 from fastapi.middleware.cors import CORSMiddleware
@@ -30,6 +30,7 @@ class Base(DeclarativeBase):
 
 class Category(Base):
     __tablename__="categories"
+
     id: Mapped[int] = mapped_column(primary_key=True)
     transaction_type: Mapped[int] = mapped_column(Integer, nullable=False)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -40,7 +41,7 @@ class Transaction(Base):
     __tablename__="transactions"
     
     id: Mapped[int] = mapped_column(primary_key=True)
-    category_id: Mapped[int] = mapped_column(ForeignKey("categories.id"))
+    category_id: Mapped[int] = mapped_column(ForeignKey("categories.id"), nullable=False)
     category: Mapped["Category"] = relationship(back_populates="transactions")
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     amount: Mapped[float] = mapped_column(Numeric, nullable=False)
@@ -50,12 +51,11 @@ class CategoryCreate(BaseModel):
     name:str
 
 class CategoryResponse(BaseModel):
-    model_config = ConfigDict(from_attributes = True)
+    model_config = ConfigDict(from_attributes = True, arbitrary_types_allowed=True)
 
     id:int
     transaction_type:int
-    name:str
-    
+    name:str    
 
 class TransactionCreate(BaseModel):
     category_id:int
@@ -66,12 +66,14 @@ class TransactionDelete(BaseModel):
     id: int
 
 class TransactionResponse(BaseModel):
-    model_config = ConfigDict(from_attributes = True)
+    model_config = ConfigDict(from_attributes = True, arbitrary_types_allowed=True)
 
     id:int
     category_id:int
     name:str
     amount:float
+    category:CategoryResponse    
+
 
 Base.metadata.create_all(engine)
 
@@ -137,15 +139,13 @@ def get_transaction(transaction_id:int, db:Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Transaction not found")
     return transaction
 
-@app.get("/transactions")
+@app.get("/transactions", response_model=List[TransactionResponse])
 def get_transactions(db:Session = Depends(get_db)):
     transactions = db.query(Transaction).all()
     return transactions
 
 @app.post("/transactions", response_model=TransactionResponse)
 def create_transaction(response: Response, transaction:TransactionCreate, db:Session = Depends(get_db)):
-    if db.query(Transaction).filter(Transaction.name == transaction.name).first():
-        raise HTTPException(status_code=501, detail="This transaction exists")
     new_transaction = Transaction(**transaction.model_dump())
     response.headers["Content-type"] = "application/json"
     db.add(new_transaction)
