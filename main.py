@@ -85,8 +85,6 @@ def get_db():
     finally:
         db.close()
 
-#get_db()
-
 
 @app.get("/", response_class=HTMLResponse)
 def get_root():
