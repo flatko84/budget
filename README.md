@@ -80,7 +80,7 @@ A minimal personal budgeting tool for managing income and expense transactions.
 ```bash
 uv pip install fastapi pydantic sqlalchemy uvicorn
 uv run main.py
-``
+```
 
 ---
 
@@ -90,4 +90,4 @@ uv run main.py
 cd frontend/budget
 npm install
 npm run dev
-``
+```
