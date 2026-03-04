@@ -1,12 +1,13 @@
 from fastapi import FastAPI, Depends, HTTPException, Response
 from fastapi.responses import HTMLResponse
 import uvicorn
-from sqlalchemy import create_engine, Column, DateTime, Integer, String, Numeric, ForeignKey, select, desc
+from sqlalchemy import create_engine, Column, DateTime, Integer, String, Numeric, ForeignKey, select, func, desc
 from sqlalchemy.orm import sessionmaker, Session, DeclarativeBase, Mapped, mapped_column, relationship, selectinload, joinedload
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
 from fastapi.middleware.cors import CORSMiddleware
+from enum import Enum
 
 print("Server starting...")
 
@@ -154,6 +155,21 @@ def create_transaction(response: Response, transaction:TransactionCreate, db:Ses
     db.commit()
     db.refresh(new_transaction)
     return new_transaction
+
+## To do - make Type an Enum class
+@app.get("/stats")
+def get_stats(from_date: datetime = None, to_date: datetime = None, type: str = "all", db:Session = Depends(get_db)):
+    query = db.query(func.coalesce(func.sum(Transaction.amount), 0))
+    if type == "expence":
+        query = query.where(Transaction.amount < 0)
+    if type == "income":
+        query = query.where(Transaction.amount > 0)
+    if from_date:
+        query = query.filter(Transaction.date >= from_date)
+    if to_date:
+        query = query.filter(Transaction.date <= to_date)
+    stats = (query.scalar())
+    return stats
 
 @app.delete("/transaction/{transaction_id}")
 def delete_transaction(transaction_id:int, db:Session = Depends(get_db)):

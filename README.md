@@ -29,6 +29,8 @@ A minimal personal budgeting tool for managing income and expense transactions.
   - Expenses appear in **red**  
   - Each entry includes a **Delete** button  
 - The list updates automatically as changes are made
+- Statistics check for a given period - total income, total expense, total balance
+
 
 ---
 
@@ -56,7 +58,6 @@ A minimal personal budgeting tool for managing income and expense transactions.
 
 ## 📈 Roadmap / To‑Do List
 
-- Implement balance check for a given period - total income, total expense, total balance
 - Implement filtering by type, category, and/or date
 - Build a React UI for Category CRUD  
   (currently accessible only via the FastAPI Swagger UI)
