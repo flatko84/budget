@@ -23,7 +23,7 @@ A minimal personal budgeting tool for managing income and expense transactions.
 ### User Story
 
 - Add **two types of transactions**: *income* or *expense*  
-- After selecting a type, choose a **category**, enter an **amount**, and provide a **name**  
+- After selecting a type, date, choose a **category**, enter an **amount**, and provide a **name**  
 - View a **chronological list** of all transactions  
   - Incomes appear in **green**  
   - Expenses appear in **red**  
@@ -56,7 +56,7 @@ A minimal personal budgeting tool for managing income and expense transactions.
 
 ## 📈 Roadmap / To‑Do List
 
-- Add transaction date (defaulting to current date)
+- Implement balance check for a given period - total income, total expense, total balance
 - Implement filtering by type, category, and/or date
 - Build a React UI for Category CRUD  
   (currently accessible only via the FastAPI Swagger UI)

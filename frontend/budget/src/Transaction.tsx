@@ -11,8 +11,10 @@ function Transaction({transaction, deleteTransaction}) {
 
   return (
     <>
-      <tr><td className={transactionColor}>
-        {transaction.name}: €{amount(transaction.amount)}</td><td style={{ width: "50px" }}>{transaction.category.name}</td><td style={{ width: "50px" }}><button data-id={transaction.id} onClick={(e) => {e.preventDefault; deleteTransaction(e.target.dataset.id)}}>Delete</button></td>
+      <tr>
+        <td style={{ width: "250px" }}>{new Date(transaction.date).toDateString()}</td>
+      <td className={transactionColor}>
+        {transaction.name}: €{amount(transaction.amount)}</td><td style={{ width: "150px" }}>{transaction.category.name}</td><td style={{ width: "50px" }}><button data-id={transaction.id} onClick={(e) => {e.preventDefault; deleteTransaction(e.target.dataset.id)}}>Delete</button></td>
       </tr>
       
     </>

@@ -1,8 +1,9 @@
 from fastapi import FastAPI, Depends, HTTPException, Response
 from fastapi.responses import HTMLResponse
 import uvicorn
-from sqlalchemy import create_engine, Column, Integer, String, Numeric, ForeignKey, select
+from sqlalchemy import create_engine, Column, DateTime, Integer, String, Numeric, ForeignKey, select, desc
 from sqlalchemy.orm import sessionmaker, Session, DeclarativeBase, Mapped, mapped_column, relationship, selectinload, joinedload
+from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
 from fastapi.middleware.cors import CORSMiddleware
@@ -41,6 +42,7 @@ class Transaction(Base):
     __tablename__="transactions"
     
     id: Mapped[int] = mapped_column(primary_key=True)
+    date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     category_id: Mapped[int] = mapped_column(ForeignKey("categories.id"), nullable=False)
     category: Mapped["Category"] = relationship(back_populates="transactions")
     name: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -58,6 +60,7 @@ class CategoryResponse(BaseModel):
     name:str    
 
 class TransactionCreate(BaseModel):
+    date: datetime
     category_id:int
     name:str
     amount:float
@@ -69,6 +72,7 @@ class TransactionResponse(BaseModel):
     model_config = ConfigDict(from_attributes = True, arbitrary_types_allowed=True)
 
     id:int
+    date: datetime
     category_id:int
     name:str
     amount:float
@@ -139,7 +143,7 @@ def get_transaction(transaction_id:int, db:Session = Depends(get_db)):
 
 @app.get("/transactions", response_model=List[TransactionResponse])
 def get_transactions(db:Session = Depends(get_db)):
-    transactions = db.query(Transaction).all()
+    transactions = db.query(Transaction).order_by(desc(Transaction.date)).all()
     return transactions
 
 @app.post("/transactions", response_model=TransactionResponse)

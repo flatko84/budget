@@ -47,8 +47,8 @@ const createTransactionCallback = () => {
   const transactions = useQuery({queryKey: ['transactions'], queryFn: fetchTransactions})
   return (
     <>
-    <h2>Create transaction</h2>
-    <CreateTransaction categories={categories.data} createTransactionCallback={createTransactionCallback}></CreateTransaction>
+      
+      <CreateTransaction categories={categories.data} createTransactionCallback={createTransactionCallback}></CreateTransaction>
       <h2>Transactions list</h2>
       <table><tbody>
       {transactions?.data?.map(transaction => {

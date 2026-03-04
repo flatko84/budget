@@ -11,6 +11,9 @@ function CreateTransaction({ categories, createTransactionCallback }) {
       body: JSON.stringify(newTransaction),
     });
     createTransactionCallback()
+    setTransaction((prev) => {
+      return {};
+    });
     return response.json();
   };
 
@@ -18,7 +21,6 @@ function CreateTransaction({ categories, createTransactionCallback }) {
     setTransaction((prev) => {
       const updated = { ...prev, [key]: value };
 
-      // Normalize negative amount for expenses
       if (updated.type === "0" && updated.amount > 0) {
         updated.amount = updated.amount * -1;
       }
@@ -35,9 +37,20 @@ function CreateTransaction({ categories, createTransactionCallback }) {
   };
 
   return (
+    <>
+    <h2>Create transaction</h2>
     <form onSubmit={handleSubmit}>
       <table>
         <tbody>
+          <tr>
+            <td>Date:</td>
+            <td>
+              <input type="date"
+                value={transaction.date || ""}
+                onChange={(e) => handleChange("date", e.target.value)}
+              />
+            </td>
+          </tr>
           <tr>
             <td>Type:</td>
             <td>
@@ -104,6 +117,7 @@ function CreateTransaction({ categories, createTransactionCallback }) {
         </tbody>
       </table>
     </form>
+    </>
   );
 }
 
